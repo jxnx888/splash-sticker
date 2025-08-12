@@ -340,7 +340,9 @@ export default function ThreeScene({previewDecalsRef}: ThreeSceneServerProps) {
     if (!mesh) return;
 
     const position = intersection.point.clone();
-    const orientation = mouseHelperRef.current!.rotation.clone();
+    // const orientation = mouseHelperRef.current!.rotation.clone();
+    const orientation = new THREE.Euler();
+
     if(paramsRef.current.rotate){
       orientation.z= paramsRef.current.rotation / 60;
     }

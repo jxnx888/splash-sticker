@@ -1,0 +1,10 @@
+.decal {
+    border: 1px solid #D6DBE1;
+    margin: 5px;
+    background: #F4F4F4;
+    width: 100px;
+    height: 100px;
+}
+.activeDecal {
+    border:1px solid red;
+}

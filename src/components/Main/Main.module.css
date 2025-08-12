@@ -1,0 +1,15 @@
+.left {
+    width: 30%;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    overflow: auto;
+    min-width: 127px;
+    max-width: 355px;
+    height: 100%;
+    justify-content: center;
+}
+.right {
+    flex: 1;
+    position: relative;
+}

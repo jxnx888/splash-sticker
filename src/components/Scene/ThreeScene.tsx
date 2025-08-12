@@ -289,7 +289,7 @@ export default function ThreeScene({previewDecalsRef}: ThreeSceneServerProps) {
     const height = mountRef.current!.clientHeight;
     const leftDecalWidth = previewDecalsRef?.current?.clientWidth || 0;
 
-    mouseRef.current.x = (x / (width + leftDecalWidth)) * 2 - 1 - 0.15;
+    mouseRef.current.x = (x / (width + leftDecalWidth)) * 2 - 1 - 0.2;
     mouseRef.current.y = -(y / height) * 2 + 1 + 0.12;
 
     raycaster.setFromCamera(mouseRef.current, camera);

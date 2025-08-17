@@ -8,7 +8,7 @@ import { Button } from '@mantine/core';
 import styles from './PuzzleFlat.module.css';
 
 export const PuzzleFlat = () => {
-  const containerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(document.createElement('div'));
   const {addImageToGrid, handleUploadImage, exportCanvas} = usePixiPuzzle({containerRef});
   const uniqueId = useId();
 

@@ -95,7 +95,7 @@ export function usePixiPuzzle({ containerRef, gridSize = 100, gridCount = 10 }: 
 
   /** 将图片加入网格 */
   const addImageToGrid = useCallback(
-    (texture: Texture) => {
+    (texture: Texture, position?: {x: number, y: number}) => {
       if (!gridContainerRef.current) return;
 
       const sprite = new Sprite(texture);
@@ -104,9 +104,9 @@ export function usePixiPuzzle({ containerRef, gridSize = 100, gridCount = 10 }: 
       sprite.interactive = true;
       sprite.cursor = "pointer";
 
-      sprite.x = 0;
-      sprite.y = 0;
-
+      sprite.x =position?.x ?? 0;
+      sprite.y =position?.y ?? 0;
+      snapToGrid(sprite);
       /** 拖拽事件 */
       sprite.on("pointerdown", (e) => {
         // 重新 addChild，会把它放到最顶层
@@ -143,7 +143,7 @@ export function usePixiPuzzle({ containerRef, gridSize = 100, gridCount = 10 }: 
 
   /** 上传图片并裁剪为正方形 */
   const handleUploadImage = useCallback(
-    async (file: File) => {
+    async (file: File, position?: {x:number, y:number}) => {
       const bitmap = await createImageBitmap(file);
       const size = Math.min(bitmap.width, bitmap.height);
 
@@ -151,10 +151,11 @@ export function usePixiPuzzle({ containerRef, gridSize = 100, gridCount = 10 }: 
       canvas.width = size;
       canvas.height = size;
       const ctx = canvas.getContext("2d")!;
+      //
       ctx.drawImage(bitmap, 0, 0, size, size, 0, 0, size, size);
 
       const texture = Texture.from(canvas);
-      addImageToGrid(texture);
+      addImageToGrid(texture, position);
     },
     [addImageToGrid]
   );

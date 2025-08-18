@@ -10,7 +10,9 @@
   },
   "dependencies": {
     "@mantine/core": "^8.2.4",
+    "@mantine/dropzone": "^8.2.5",
     "@mantine/hooks": "^8.2.4",
+    "@tabler/icons-react": "^3.34.1",
     "lodash": "^4.17.21",
     "next": "15.4.6",
     "pixi.js": "^8.12.0",

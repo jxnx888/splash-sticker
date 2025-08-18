@@ -5,7 +5,7 @@ import React, { useId, useRef } from "react";
 import { usePixiPuzzle } from "./usePixiPuzzle";
 import { Assets } from "pixi.js";
 import { Button } from '@mantine/core';
-import { Dropzone, DropzoneProps, IMAGE_MIME_TYPE } from '@mantine/dropzone';
+import { Dropzone, IMAGE_MIME_TYPE } from '@mantine/dropzone';
 import { Group, Text } from '@mantine/core';
 import { IconUpload, IconPhoto, IconX } from '@tabler/icons-react';
 
@@ -13,7 +13,7 @@ import '@mantine/dropzone/styles.css';
 import styles from './PuzzleFlat.module.css';
 
 export const PuzzleFlat = () => {
-  const containerRef = useRef<HTMLDivElement>(document.createElement('div'));
+  const containerRef = useRef<HTMLDivElement>(null);
   const {addImageToGrid, handleUploadImage, exportCanvas} = usePixiPuzzle({containerRef});
   const uniqueId = useId();
 

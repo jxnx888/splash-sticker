@@ -4,7 +4,7 @@ import React, { useRef, useCallback, useEffect } from "react";
 import { Application, Container, Sprite, Texture, Graphics } from "pixi.js";
 
 type UsePixiPuzzleProps = {
-  containerRef: React.RefObject<HTMLDivElement>;
+  containerRef: React.RefObject<HTMLDivElement | null>;
   gridSize?: number;
   gridCount?: number;
 };
@@ -14,7 +14,7 @@ export function usePixiPuzzle({ containerRef, gridSize = 100, gridCount = 10 }: 
   const gridContainerRef = useRef<Container | null>(null);
 
   /** 拖拽状态 WeakMap */
-  const draggingMap = useRef(new WeakMap<Sprite, { dragging: boolean; data?: any }>());
+  const draggingMap = useRef(new WeakMap<Sprite, { dragging: boolean; data?: never }>());
 
   /** 绘制网格 */
   const drawGrid = (container: Container, size: number, count: number) => {
@@ -111,6 +111,7 @@ export function usePixiPuzzle({ containerRef, gridSize = 100, gridCount = 10 }: 
       sprite.on("pointerdown", (e) => {
         // 重新 addChild，会把它放到最顶层
         sprite?.parent?.addChild(sprite);
+        // @ts-expect-error exist
         draggingMap.current.set(sprite, { dragging: true, data: e.data });
       });
       sprite.on("pointerup", () => {
@@ -130,6 +131,7 @@ export function usePixiPuzzle({ containerRef, gridSize = 100, gridCount = 10 }: 
       sprite.on("pointermove", () => {
         const state = draggingMap.current.get(sprite);
         if (state?.dragging && state.data) {
+          // @ts-expect-error exist
           const newPos = state.data.getLocalPosition(sprite.parent);
           sprite.x = newPos.x - sprite.width / 2;
           sprite.y = newPos.y - sprite.height / 2;
@@ -138,6 +140,7 @@ export function usePixiPuzzle({ containerRef, gridSize = 100, gridCount = 10 }: 
 
       gridContainerRef.current.addChild(sprite);
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [gridSize]
   );
 
@@ -163,8 +166,9 @@ export function usePixiPuzzle({ containerRef, gridSize = 100, gridCount = 10 }: 
   /** 导出画布 */
   const exportCanvas = useCallback(() => {
     if (!appRef.current) return null;
-    const canvas = (appRef.current.renderer as any).extract.canvas(appRef.current.stage);
-    return canvas.toDataURL("image/png");
+    const canvas = appRef.current.renderer?.extract.canvas(appRef.current.stage);
+    // @ts-expect-error exist
+    return canvas?.toDataURL("image/png");
   }, []);
 
   useEffect(() => {

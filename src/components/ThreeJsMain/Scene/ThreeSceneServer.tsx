@@ -1,6 +1,6 @@
 'use client';
-import { ThreeSceneServerProps } from "@/src/components/Scene/ThreeScene";
 import dynamic from "next/dynamic";
+import { ThreeSceneServerProps } from "./ThreeScene";
 
 const ThreeScene = dynamic(() => import("./ThreeScene"), {
   ssr: false,

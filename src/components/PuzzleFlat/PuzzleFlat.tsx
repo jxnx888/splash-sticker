@@ -1,20 +1,22 @@
 "use client";
 import times from "lodash/times";
 import Image from "next/image";
-import React, { useId, useRef } from "react";
+import React, { useId, useRef, useState } from "react";
 import { usePixiPuzzle } from "./usePixiPuzzle";
 import { Assets } from "pixi.js";
 import { Button } from '@mantine/core';
 import { Dropzone, IMAGE_MIME_TYPE } from '@mantine/dropzone';
 import { Group, Text } from '@mantine/core';
 import { IconUpload, IconPhoto, IconX } from '@tabler/icons-react';
+import { Checkbox } from '@mantine/core';
 
 import '@mantine/dropzone/styles.css';
 import styles from './PuzzleFlat.module.css';
 
 export const PuzzleFlat = () => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const {addImageToGrid, handleUploadImage, exportCanvas, mapDomToPixiPosition} = usePixiPuzzle({containerRef});
+  const [enableNetGrid, setEnableNetGrid] = useState(false);
+  const {addImageToGrid, handleUploadImage, exportCanvas, mapDomToPixiPosition} = usePixiPuzzle({containerRef, enableNetGrid});
   const uniqueId = useId();
 
   // 示例预制图片
@@ -29,17 +31,24 @@ export const PuzzleFlat = () => {
         <div className={styles.controlsPanel}>
           <div className={styles.exportCanvas}>
             <Button variant="filled"
-                    className={styles.exportCanvasButton}
-                    onClick={() => {
-                      const dataUrl = exportCanvas();
-                      if (dataUrl) {
-                        const link = document.createElement("a");
-                        link.href = dataUrl;
-                        link.download = "puzzle.png";
-                        link.click();
-                      }
-                    }}
+              className={styles.exportCanvasButton}
+              onClick={() => {
+                const dataUrl = exportCanvas();
+                if (dataUrl) {
+                  const link = document.createElement("a");
+                  link.href = dataUrl;
+                  link.download = "puzzle.png";
+                  link.click();
+                }
+              }}
             >Export Canvas Content</Button>
+          </div>
+          <div className={styles.enableGrid}>
+            <Checkbox
+              checked={enableNetGrid}
+              onChange={(event) => setEnableNetGrid(event.currentTarget.checked)}
+              label="Grid mode with adsorption function"
+            />
           </div>
           <div className={styles.upload}>
             <Dropzone

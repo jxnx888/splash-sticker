@@ -7,9 +7,10 @@ type UsePixiPuzzleProps = {
   containerRef: React.RefObject<HTMLDivElement | null>;
   gridSize?: number;
   gridCount?: number;
+  enableNetGrid?: boolean;
 };
 
-export function usePixiPuzzle({ containerRef, gridSize = 100, gridCount = 10 }: UsePixiPuzzleProps) {
+export function usePixiPuzzle({ containerRef, gridSize = 100, gridCount = 10, enableNetGrid }: UsePixiPuzzleProps) {
   const appRef = useRef<Application | null>(null);
   const gridContainerRef = useRef<Container | null>(null);
 
@@ -21,14 +22,15 @@ export function usePixiPuzzle({ containerRef, gridSize = 100, gridCount = 10 }: 
     const g = new Graphics();
     g.rect(0, 0, count * size, count * size)
       .fill({ color: 0xffffff }); // 白底
-
-    for (let i = 0; i <= count; i++) {
-      // 水平线
-      g.moveTo(0, i * size);
-      g.lineTo(count * size, i * size);
-      // 垂直线
-      g.moveTo(i * size, 0);
-      g.lineTo(i * size, count * size);
+    if(enableNetGrid) {
+      for (let i = 0; i <= count; i++) {
+        // 水平线
+        g.moveTo(0, i * size);
+        g.lineTo(count * size, i * size);
+        // 垂直线
+        g.moveTo(i * size, 0);
+        g.lineTo(i * size, count * size);
+      }
     }
     g.stroke({ color: 0xdddddd, width: 1, alpha: 1 });
     container.addChild(g);
@@ -56,10 +58,10 @@ export function usePixiPuzzle({ containerRef, gridSize = 100, gridCount = 10 }: 
   /** 初始化 Pixi App */
   const initPixi = useCallback(async () => {
     if (!containerRef.current) return;
-
+    console.log("Initializing PixiJS Application...enableNetGrid", enableNetGrid);
     const app = new Application();
     await app.init({
-      background: "#ffffff",
+      background: "#f8f9fa",
       resizeTo: containerRef.current!,
       antialias: true,
     });
@@ -70,13 +72,27 @@ export function usePixiPuzzle({ containerRef, gridSize = 100, gridCount = 10 }: 
     const gridContainer = new Container();
     app.stage.addChild(gridContainer);
     gridContainerRef.current = gridContainer;
+      drawGrid(gridContainer, gridSize, gridCount);
+      resizeGrid();
+      // 监听窗口变化
+      window.addEventListener("resize", resizeGrid);
 
-    drawGrid(gridContainer, gridSize, gridCount);
-    resizeGrid();
+  }, [containerRef, enableNetGrid, gridSize, gridCount, resizeGrid]);
 
-    // 监听窗口变化
-    window.addEventListener("resize", resizeGrid);
-  }, [containerRef, gridSize, gridCount, resizeGrid]);
+  /** 限制在网格边界范围内 */
+  const clampToGridBounds = (sprite: Sprite) => {
+    const baseSize = gridSize * gridCount;
+
+    let x = sprite.x;
+    let y = sprite.y;
+
+    // 限制不能超出边界
+    x = Math.max(0, Math.min(x, baseSize - sprite.width));
+    y = Math.max(0, Math.min(y, baseSize - sprite.height));
+
+    sprite.x = x;
+    sprite.y = y;
+  };
 
   /** 吸附到网格 */
   const snapToGrid = (sprite: Sprite) => {
@@ -113,7 +129,12 @@ export function usePixiPuzzle({ containerRef, gridSize = 100, gridCount = 10 }: 
         sprite.y = 0;
       }
 
+    if(enableNetGrid){
       snapToGrid(sprite);
+    } else{
+      clampToGridBounds(sprite);
+    }
+
       /** 拖拽事件 */
       sprite.on("pointerdown", (e) => {
         // 重新 addChild，会把它放到最顶层
@@ -125,14 +146,22 @@ export function usePixiPuzzle({ containerRef, gridSize = 100, gridCount = 10 }: 
         const state = draggingMap.current.get(sprite);
         if (state) {
           state.dragging = false;
-          snapToGrid(sprite);
+          if(enableNetGrid){
+            snapToGrid(sprite);
+          } else{
+            clampToGridBounds(sprite);
+          }
         }
       });
       sprite.on("pointerupoutside", () => {
         const state = draggingMap.current.get(sprite);
         if (state) {
           state.dragging = false;
-          snapToGrid(sprite);
+          if(enableNetGrid){
+            snapToGrid(sprite);
+          } else{
+            clampToGridBounds(sprite);
+          }
         }
       });
       sprite.on("pointermove", () => {
@@ -148,7 +177,7 @@ export function usePixiPuzzle({ containerRef, gridSize = 100, gridCount = 10 }: 
       gridContainerRef.current.addChild(sprite);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [gridSize]
+    [gridSize, enableNetGrid]
   );
 
   /** 上传图片并裁剪为正方形 */

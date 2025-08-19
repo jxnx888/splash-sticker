@@ -29,6 +29,9 @@
                 height: 30px;
             }
         }
+        .enableGrid {
+            padding: 10px 5px 5px;
+        }
         .upload {
             color: #999;
             width: 100%;

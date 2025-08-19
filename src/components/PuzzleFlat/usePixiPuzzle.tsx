@@ -174,6 +174,19 @@ export function usePixiPuzzle({ containerRef, gridSize = 100, gridCount = 10, en
         }
       });
 
+      // 鼠标滚轮缩放
+      sprite.on("wheel", (e: WheelEvent) => {
+        e.preventDefault();
+
+        const scaleFactor = e.deltaY < 0 ? 1.1 : 0.9; // 向上滚放大，向下滚缩小
+        sprite.scale.x *= scaleFactor;
+        sprite.scale.y *= scaleFactor;
+
+        // 限制缩放范围
+        sprite.scale.x = Math.max(0.2, Math.min(sprite.scale.x, 5));
+        sprite.scale.y = Math.max(0.2, Math.min(sprite.scale.y, 5));
+      });
+
       gridContainerRef.current.addChild(sprite);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps

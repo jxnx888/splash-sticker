@@ -14,7 +14,7 @@ import styles from './PuzzleFlat.module.css';
 
 export const PuzzleFlat = () => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const {addImageToGrid, handleUploadImage, exportCanvas} = usePixiPuzzle({containerRef});
+  const {addImageToGrid, handleUploadImage, exportCanvas, mapDomToPixiPosition} = usePixiPuzzle({containerRef});
   const uniqueId = useId();
 
   // 示例预制图片
@@ -44,7 +44,6 @@ export const PuzzleFlat = () => {
           <div className={styles.upload}>
             <Dropzone
               onDrop={(files) => {
-                console.log('files', files)
                 if (files.length > 0) {
                   handleUploadImage(files[0])
                 }
@@ -87,7 +86,6 @@ export const PuzzleFlat = () => {
                 // 把路径放到 drag data
                 e.dataTransfer.setData("text/plain", decalPath);
                 e.dataTransfer.effectAllowed = "copy";
-                console.log("drag start", decalPath);
               }}
             >
               <Image
@@ -109,11 +107,8 @@ export const PuzzleFlat = () => {
         }}
         onDrop={async (e) => {
           e.preventDefault();
+          const position = mapDomToPixiPosition(e.clientX, e.clientY);
 
-          const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
-          const x = e.clientX - rect.left;
-          const y = e.clientY - rect.top;
-          const position = {x, y};
           // 1. 检查是否是本地文件
           if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
             const file = e.dataTransfer.files[0];

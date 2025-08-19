@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useRef, useCallback, useEffect } from "react";
-import { Application, Container, Sprite, Texture, Graphics } from "pixi.js";
+import { Application, Container, Sprite, Texture, Graphics, Point } from "pixi.js";
 
 type UsePixiPuzzleProps = {
   containerRef: React.RefObject<HTMLDivElement | null>;
@@ -104,8 +104,15 @@ export function usePixiPuzzle({ containerRef, gridSize = 100, gridCount = 10 }: 
       sprite.interactive = true;
       sprite.cursor = "pointer";
 
-      sprite.x =position?.x ?? 0;
-      sprite.y =position?.y ?? 0;
+      // ✅ 如果是拖拽放置：先让“鼠标指向大致是图片中心”
+      if (position) {
+        sprite.x = position.x - sprite.width / 2;
+        sprite.y = position.y - sprite.height / 2;
+      } else {
+        sprite.x = 0;
+        sprite.y = 0;
+      }
+
       snapToGrid(sprite);
       /** 拖拽事件 */
       sprite.on("pointerdown", (e) => {
@@ -163,6 +170,18 @@ export function usePixiPuzzle({ containerRef, gridSize = 100, gridCount = 10 }: 
     [addImageToGrid]
   );
 
+  const mapDomToPixiPosition = (clientX: number, clientY: number) => {
+    if (!appRef.current || !gridContainerRef.current) return { x: 0, y: 0 };
+
+    // 1) DOM 坐标 -> PIXI 全局坐标（注意：这里需要的是 clientX / clientY，**不要**再减 rect）
+    const global = new Point();
+    appRef.current.renderer.events.mapPositionToPoint(global, clientX, clientY);
+
+    // 2) PIXI 全局坐标 -> 网格容器的本地坐标（自动包含了网格容器的 scale + x/y 偏移）
+    const local = gridContainerRef.current.toLocal(global);
+
+    return { x: local.x, y: local.y };
+  };
   /** 导出画布 */
   const exportCanvas = useCallback(() => {
     if (!appRef.current) return null;
@@ -182,5 +201,5 @@ export function usePixiPuzzle({ containerRef, gridSize = 100, gridCount = 10 }: 
     };
   }, [initPixi, resizeGrid]);
 
-  return { addImageToGrid, handleUploadImage, exportCanvas };
+  return { addImageToGrid, handleUploadImage, exportCanvas, mapDomToPixiPosition };
 }
